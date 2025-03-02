@@ -1,0 +1,22 @@
+<!-- Page Navigation Menu -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-light">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between">
+                    <div class="btn-group w-100" role="group">
+                        <a href="{{ url_for('summary') }}" class="btn btn-lg {{ 'btn-primary' if request.path == url_for('summary') else 'btn-outline-primary' }}">
+                            <i class="bi bi-bar-chart"></i> Summary
+                        </a>
+                        <a href="{{ url_for('lineups') }}" class="btn btn-lg {{ 'btn-primary' if request.path == url_for('lineups') else 'btn-outline-primary' }}">
+                            <i class="bi bi-people"></i> Lineups
+                        </a>
+                        <a href="{{ url_for('actions') }}" class="btn btn-lg {{ 'btn-primary' if request.path == url_for('actions') else 'btn-outline-primary' }}">
+                            <i class="bi bi-list-ul"></i> Actions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

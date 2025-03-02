@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Action Details - {{ event.type|title }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('summary') }}">Game</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('actions') }}">Actions</a></li>
+                <li class="breadcrumb-item active">{{ event.type|title }} - {{ event.time }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header  text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        {% if event.type == 'goal' %}
+                            <i class="bi bi-trophy"></i> Goal
+                        {% elif event.type == 'penalty' %}
+                            <i class="bi bi-exclamation-triangle"></i> Penalty
+                        {% elif event.type == 'goalie-in' %}
+                            <i class="bi bi-person-plus"></i> Goalie In
+                        {% elif event.type == 'goalie-out' %}
+                            <i class="bi bi-person-dash"></i> Goalie Out
+                        {% elif event.type == 'timeout' %}
+                            <i class="bi bi-stopwatch"></i> Timeout
+                        {% else %}
+                            <i class="bi bi-info-circle"></i> {{ event.type|title }}
+                        {% endif %}
+                    </h4>
+                    <div>
+                        <span class="badge bg-light text-dark">
+                            Period {{ event.period }} • {{ event.time|format_time }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="alert alert-{{ 'primary' if event.team == 'home' else 'danger' }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="alert-heading mb-0">
+                                        {% if event.team == 'home' %}
+                                            {{ game.teams.home.name }}
+                                        {% else %}
+                                            {{ game.teams.away.name }}
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div>
+                                    {% if event.team == 'home' %}
+                                        <span class="badge bg-primary">HOME</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">AWAY</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if event.player is defined and event.player is not none %}
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="mb-0"><i class="bi bi-person"></i> Player</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-{{ 'primary' if event.team == 'home' else 'danger' }} text-white d-flex align-items-center justify-content-center me-3" 
+                                        style="width: 60px; height: 60px; font-weight: bold; font-size: 1.5rem;">
+                                        {{ event.player.jerseyNo }}
+                                    </div>
+                                    <div>
+                                        <h4 class="mb-0">{{ event.player.name }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if event.type == 'goal' %}
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0"><i class="bi bi-trophy"></i> Goal Details</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% if event.scoreState is defined and event.scoreState is not none %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Score After Goal</strong></span>
+                                        <span class="badge bg-secondary">{{ event.scoreState }}</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                
+                                {% if event.strength is defined and event.strength is not none %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Strength</strong></span>
+                                        <span class="badge bg-{{ 'secondary' if event.strength == 'EQ' else 'warning text-dark' }}">
+                                            {% if event.strength == 'EQ' %}
+                                                Even Strength
+                                            {% elif event.strength == 'PP1' %}
+                                                Power Play (+1)
+                                            {% elif event.strength == 'PP2' %}
+                                                Power Play (+2)
+                                            {% elif event.strength == 'SH1' %}
+                                                Short Handed (-1)
+                                            {% elif event.strength == 'SH2' %}
+                                                Short Handed (-2)
+                                            {% else %}
+                                                {{ event.strength }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                
+                                {% if event.goalNumber is defined and event.goalNumber is not none %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Goal Number</strong></span>
+                                        <span class="badge bg-primary">{{ event.goalNumber }}</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                
+                                {% if event.assists is defined and event.assists is not none and event.assists|length > 0 %}
+                                <li class="list-group-item detail-item">
+                                    <strong>Assists</strong>
+                                    <div class="mt-2">
+                                        {% for assist in event.assists %}
+                                        <div class="d-flex align-items-center mb-2">
+                                            <div class="rounded-circle bg-{{ 'primary' if event.team == 'home' else 'danger' }} text-white d-flex align-items-center justify-content-center me-2" 
+                                                style="width: 40px; height: 40px; font-weight: bold; font-size: 1rem;">
+                                                {{ assist.jerseyNo }}
+                                            </div>
+                                            <div>
+                                                <span>{{ assist.name }}</span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </li>
+                                {% else %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Assists</strong></span>
+                                        <span class="badge bg-secondary">Unassisted</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if event.type == 'penalty' %}
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Penalty Details</h5>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                {% if event.reason is defined and event.reason is not none %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Reason</strong></span>
+                                        <span class="badge bg-danger">{{ event.reason }}</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                                
+                                {% if event.duration is defined and event.duration is not none %}
+                                <li class="list-group-item detail-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Duration</strong></span>
+                                        <span class="badge bg-warning text-dark">{{ event.duration }} minutes</span>
+                                    </div>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="row mt-4">
+                    <div class="col-md-12 text-center">
+                        <a href="{{ url_for('actions') }}" class="btn btn-secondary me-2">
+                            <i class="bi bi-arrow-left"></i> Back to Actions
+                        </a>
+                        <a href="{{ url_for('refresh', refresh_type='actions') }}" class="btn btn-primary">
+                            <i class="bi bi-arrow-repeat"></i> Refresh All Actions
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

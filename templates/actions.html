@@ -1,0 +1,444 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.teams.home.name }} vs {{ game.teams.away.name }} - Actions{% endblock %}
+
+{% block content %}
+<div class="game-header text-center">
+    <h2>
+        <span class="home-team">{{ game.teams.home.name }}</span>
+        <span class="mx-2">{{ game.game.result.score }}</span>
+        <span class="away-team">{{ game.teams.away.name }}</span>
+    </h2>
+    <p class="mb-0">{{ game.game.tournament.name }} | {{ game.game.date|format_datetime }}</p>
+    <p class="mb-0">{{ game.game.venue }}{% if game.game.attendance %} | Attendance: {{ game.game.attendance }}{% endif %}</p>
+    <div class="badge bg-{{ 'success' if game.game.status.isEnded else 'warning' }} mt-2">
+        {{ game.game.status.currentSituation }}
+    </div>
+</div>
+
+<!-- Page Navigation -->
+{% include 'includes/page_navigation.html' %}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Game Actions</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-light" id="toggleFilters">
+                            <i class="bi bi-funnel"></i> Filter Events
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="filterPanel" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Event Type</label>
+                            <div class="btn-group d-flex flex-wrap" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary filter-btn active" data-filter="all">All</button>
+                                <button type="button" class="btn btn-sm btn-outline-success filter-btn" data-filter="goal">Goals</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger filter-btn" data-filter="penalty">Penalties</button>
+                                <button type="button" class="btn btn-sm btn-outline-info filter-btn" data-filter="goalie">Goalie Changes</button>
+                                <button type="button" class="btn btn-sm btn-outline-warning filter-btn" data-filter="timeout">Timeouts</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label">Team</label>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-sm btn-outline-primary team-filter-btn active" data-team="all">All</button>
+                                <button type="button" class="btn btn-sm btn-outline-primary team-filter-btn" data-team="home">{{ game.teams.home.shortName }}</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger team-filter-btn" data-team="away">{{ game.teams.away.shortName }}</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% set period_events = {} %}
+{% for event in game.events %}
+    {% set _ = period_events.setdefault(event.period, []) %}
+    {% set _ = period_events[event.period].append(event) %}
+{% endfor %}
+
+{% for period, events in period_events.items() %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h4 class="period-header">
+            <i class="bi bi-calendar-event"></i> Period {{ period }}
+        </h4>
+        
+        {% for event in events %}
+        <div class="card event-card mb-3 {{ event.team }}-event {{ event.type }}-event">
+            <div class="card-body" data-bs-toggle="collapse" data-bs-target="#eventDetails{{ event.id }}" aria-expanded="false" style="cursor: pointer;">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <h5 class="mb-0">{{ event.time|format_time }}</h5>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-0 {% if event.team == 'home' %}home-team{% else %}away-team{% endif %}">
+                                    {% if event.team == 'home' %}
+                                        {{ game.teams.home.shortName }}
+                                    {% else %}
+                                        {{ game.teams.away.shortName }}
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-0">
+                                    {% if event.type == 'goal' %}
+                                        <span class="badge bg-success me-1">GOAL</span>
+                                        {% if event.player is defined and event.player is not none %}
+                                            <strong>{{ event.player.name }}</strong> ({{ event.player.jerseyNo }})
+                                        {% else %}
+                                            <em>No player data</em>
+                                        {% endif %}
+                                        {% if event.scoreState is defined and event.scoreState is not none %}
+                                            <span class="badge bg-secondary">{{ event.scoreState }}</span>
+                                        {% endif %}
+                                        {% if event.strength is defined and event.strength is not none and event.strength != 'EQ' %}
+                                            <span class="badge bg-warning text-dark">{{ event.strength }}</span>
+                                        {% endif %}
+                                    {% elif event.type == 'penalty' %}
+                                        <span class="badge bg-danger me-1">PENALTY</span>
+                                        {% if event.player is defined and event.player is not none %}
+                                            <strong>{{ event.player.name }}</strong> ({{ event.player.jerseyNo }})
+                                        {% else %}
+                                            <em>No player data</em>
+                                        {% endif %}
+                                        {% if event.reason is defined and event.reason is not none %}
+                                            <span class="badge bg-secondary">{{ event.reason }}</span>
+                                        {% endif %}
+                                        {% if event.duration is defined and event.duration is not none %}
+                                            <span class="badge bg-warning text-dark">{{ event.duration }} min</span>
+                                        {% endif %}
+                                    {% elif event.type == 'goalie-in' %}
+                                        <span class="badge bg-info me-1">GOALIE IN</span>
+                                        {% if event.player is defined and event.player is not none %}
+                                            <strong>{{ event.player.name }}</strong> ({{ event.player.jerseyNo }})
+                                        {% else %}
+                                            <em>No player data</em>
+                                        {% endif %}
+                                    {% elif event.type == 'goalie-out' %}
+                                        <span class="badge bg-secondary me-1">GOALIE OUT</span>
+                                        {% if event.player is defined and event.player is not none %}
+                                            <strong>{{ event.player.name }}</strong> ({{ event.player.jerseyNo }})
+                                        {% else %}
+                                            <em>No player data</em>
+                                        {% endif %}
+                                    {% elif event.type == 'timeout' %}
+                                        <span class="badge bg-warning text-dark me-1">TIMEOUT</span>
+                                        Team Timeout
+                                    {% else %}
+                                        <span class="badge bg-primary me-1">{{ event.type|upper }}</span>
+                                        {% if event.player is defined and event.player is not none %}
+                                            <strong>{{ event.player.name }}</strong> ({{ event.player.jerseyNo }})
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <i class="bi bi-chevron-down fs-4 toggle-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Collapsible Details Section -->
+            <div class="collapse" id="eventDetails{{ event.id }}">
+                <div class="card-body border-top">
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-{{ 'primary' if event.team == 'home' else 'danger' }}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="alert-heading mb-0">
+                                            {% if event.team == 'home' %}
+                                                {{ game.teams.home.name }}
+                                            {% else %}
+                                                {{ game.teams.away.name }}
+                                            {% endif %}
+                                        </h5>
+                                    </div>
+                                    <div>
+                                        {% if event.team == 'home' %}
+                                            <span class="badge bg-primary">HOME</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">AWAY</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Announcement Text with Speak Button -->
+                    {% if event.announcement %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0"><i class="bi bi-megaphone"></i> Announcement</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="mb-0">{{ event.announcement }}</p>
+                                        <button class="btn btn-sm btn-primary speak-btn" data-text="{{ event.announcement }}" data-event-id="{{ event.id }}">
+                                            <i class="bi bi-volume-up"></i> Speak
+                                        </button>
+                                    </div>
+                                    <audio id="audio-{{ event.id }}" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.player is defined and event.player is not none %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="mb-0"><i class="bi bi-person"></i> Player</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-{{ 'primary' if event.team == 'home' else 'danger' }} text-white d-flex align-items-center justify-content-center me-3" 
+                                            style="width: 60px; height: 60px; font-weight: bold; font-size: 1.5rem;">
+                                            {{ event.player.jerseyNo }}
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-0">{{ event.player.name }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.type == 'goal' %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0"><i class="bi bi-trophy"></i> Goal Details</h5>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    {% if event.scoreState is defined and event.scoreState is not none %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Score After Goal</strong></span>
+                                            <span class="badge bg-secondary">{{ event.scoreState }}</span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                    {% if event.strength is defined and event.strength is not none %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Strength</strong></span>
+                                            <span class="badge bg-{{ 'secondary' if event.strength == 'EQ' else 'warning text-dark' }}">
+                                                {% if event.strength == 'EQ' %}
+                                                    Even Strength
+                                                {% elif event.strength == 'PP1' %}
+                                                    Power Play (+1)
+                                                {% elif event.strength == 'PP2' %}
+                                                    Power Play (+2)
+                                                {% elif event.strength == 'SH1' %}
+                                                    Short Handed (-1)
+                                                {% elif event.strength == 'SH2' %}
+                                                    Short Handed (-2)
+                                                {% else %}
+                                                    {{ event.strength }}
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                    {% if event.goalNumber is defined and event.goalNumber is not none %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Goal Number</strong></span>
+                                            <span class="badge bg-primary">{{ event.goalNumber }}</span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                    {% if event.assists is defined and event.assists is not none and event.assists|length > 0 %}
+                                    <li class="list-group-item detail-item">
+                                        <strong>Assists</strong>
+                                        <div class="mt-2">
+                                            {% for assist in event.assists %}
+                                            <div class="d-flex align-items-center mb-2">
+                                                <div class="rounded-circle bg-{{ 'primary' if event.team == 'home' else 'danger' }} text-white d-flex align-items-center justify-content-center me-2" 
+                                                    style="width: 40px; height: 40px; font-weight: bold; font-size: 1rem;">
+                                                    {{ assist.jerseyNo }}
+                                                </div>
+                                                <div>
+                                                    <span>{{ assist.name }}</span>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </li>
+                                    {% else %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Assists</strong></span>
+                                            <span class="badge bg-secondary">Unassisted</span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if event.type == 'penalty' %}
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-danger text-white">
+                                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Penalty Details</h5>
+                                </div>
+                                <ul class="list-group list-group-flush">
+                                    {% if event.reason is defined and event.reason is not none %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Reason</strong></span>
+                                            <span class="badge bg-danger">{{ event.reason }}</span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                    {% if event.duration is defined and event.duration is not none %}
+                                    <li class="list-group-item detail-item">
+                                        <div class="d-flex justify-content-between">
+                                            <span><strong>Duration</strong></span>
+                                            <span class="badge bg-warning text-dark">{{ event.duration }} minutes</span>
+                                        </div>
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+
+<div class="text-center mb-4">
+    <a href="{{ url_for('refresh', refresh_type='actions') }}" class="btn btn-primary">
+        <i class="bi bi-arrow-repeat"></i> Refresh Actions Data
+    </a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Toggle filter panel
+        document.getElementById('toggleFilters').addEventListener('click', function() {
+            const filterPanel = document.getElementById('filterPanel');
+            filterPanel.style.display = filterPanel.style.display === 'none' ? 'block' : 'none';
+        });
+        
+        // Filter buttons functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
+        
+        // Team filter buttons functionality
+        const teamFilterButtons = document.querySelectorAll('.team-filter-btn');
+        teamFilterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                teamFilterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                applyFilters();
+            });
+        });
+        
+        // Apply both filters
+        function applyFilters() {
+            const typeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            const teamFilter = document.querySelector('.team-filter-btn.active').dataset.team;
+            
+            document.querySelectorAll('.event-card').forEach(card => {
+                const isTypeMatch = typeFilter === 'all' || card.classList.contains(`${typeFilter}-event`);
+                const isTeamMatch = teamFilter === 'all' || card.classList.contains(`${teamFilter}-event`);
+                
+                card.style.display = isTypeMatch && isTeamMatch ? 'block' : 'none';
+            });
+        }
+
+        // Toggle icon rotation
+        document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                const icon = this.querySelector('.toggle-icon');
+                icon.classList.toggle('bi-chevron-down');
+                icon.classList.toggle('bi-chevron-up');
+            });
+        });
+
+        // Speak button functionality
+        document.querySelectorAll('.speak-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.dataset.text;
+                const eventId = this.dataset.eventId;
+                const audioElement = document.getElementById(`audio-${eventId}`);
+                
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+
+                fetch('/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `text=${encodeURIComponent(text)}`
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate audio');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const audioUrl = URL.createObjectURL(blob);
+                    audioElement.src = audioUrl;
+                    audioElement.style.display = 'block';
+                    audioElement.play();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to generate audio: ' + error.message);
+                })
+                .finally(() => {
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-volume-up"></i> Speak';
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

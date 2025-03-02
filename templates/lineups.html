@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.teams.home.name }} vs {{ game.teams.away.name }} - Lineups{% endblock %}
+
+{% block content %}
+<div class="game-header text-center">
+    <h2>
+        <span class="home-team">{{ game.teams.home.name }}</span>
+        <span class="mx-2">{{ game.game.result.score }}</span>
+        <span class="away-team">{{ game.teams.away.name }}</span>
+    </h2>
+    <p class="mb-0">{{ game.game.tournament.name }} | {{ game.game.date|format_datetime }}</p>
+    <p class="mb-0">{{ game.game.venue }}{% if game.game.attendance %} | Attendance: {{ game.game.attendance }}{% endif %}</p>
+    <div class="badge bg-{{ 'success' if game.game.status.isEnded else 'warning' }} mt-2">
+        {{ game.game.status.currentSituation }}
+    </div>
+</div>
+
+<!-- Page Navigation -->
+{% include 'includes/page_navigation.html' %}
+
+
+<div class="row mb-4">
+    <div class="col-12">
+        <ul class="nav nav-pills nav-fill" id="lineupTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-lineup" type="button" role="tab">
+                    <i class="bi bi-house me-1"></i> {{ game.teams.home.name }}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="away-tab" data-bs-toggle="tab" data-bs-target="#away-lineup" type="button" role="tab">
+                    <i class="bi bi-airplane me-1"></i> {{ game.teams.away.name }}
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="tab-content" id="lineupsTabContent">
+    <!-- Home Team Lineup -->
+    <div class="tab-pane fade show active" id="home-lineup" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header home-header text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-mask"></i> Goalies - {{ game.teams.home.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for goalie in game.roster.home.goalies %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card player-card {{ 'starter' if goalie.starter }}">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                                style="width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem;">
+                                                {{ goalie.jerseyNo }}
+                                            </div>
+                                            <div>
+                                                <h5 class="card-title mb-0">{{ goalie.name }}</h5>
+                                                <p class="card-text">
+                                                    <span class="badge bg-dark">{{ goalie.position }}</span>
+                                                    {% if goalie.starter %}
+                                                    <span class="badge bg-success">Starter</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header home-header text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people"></i> Players - {{ game.teams.home.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% set home_players_by_line = {} %}
+                            {% for player in game.roster.home.players %}
+                                {% set _ = home_players_by_line.setdefault(player.line|string, []) %}
+                                {% set _ = home_players_by_line[player.line|string].append(player) %}
+                            {% endfor %}
+                            
+                            {% for line_num, players in home_players_by_line.items()|sort %}
+                            <div class="col-12 mb-3">
+                                <h5 class="period-header">Line {{ line_num }}</h5>
+                                <div class="row">
+                                    {% for player in players %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card player-card {{ 'starter' if player.starter }}">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" 
+                                                        style="width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem;">
+                                                        {{ player.jerseyNo }}
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="card-title mb-0">{{ player.name }}</h5>
+                                                        <p class="card-text">
+                                                            <span class="badge bg-info">{{ player.position }}</span>
+                                                            {% if player.starter %}
+                                                            <span class="badge bg-success">Starter</span>
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Away Team Lineup -->
+    <div class="tab-pane fade" id="away-lineup" role="tabpanel">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header away-header text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-mask"></i> Goalies - {{ game.teams.away.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for goalie in game.roster.away.goalies %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card player-card {{ 'starter' if goalie.starter }}">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3" 
+                                                style="width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem;">
+                                                {{ goalie.jerseyNo }}
+                                            </div>
+                                            <div>
+                                                <h5 class="card-title mb-0">{{ goalie.name }}</h5>
+                                                <p class="card-text">
+                                                    <span class="badge bg-dark">{{ goalie.position }}</span>
+                                                    {% if goalie.starter %}
+                                                    <span class="badge bg-success">Starter</span>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header away-header text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-people"></i> Players - {{ game.teams.away.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% set away_players_by_line = {} %}
+                            {% for player in game.roster.away.players %}
+                                {% set _ = away_players_by_line.setdefault(player.line|string, []) %}
+                                {% set _ = away_players_by_line[player.line|string].append(player) %}
+                            {% endfor %}
+                            
+                            {% for line_num, players in away_players_by_line.items()|sort %}
+                            <div class="col-12 mb-3">
+                                <h5 class="period-header">Line {{ line_num }}</h5>
+                                <div class="row">
+                                    {% for player in players %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="card player-card {{ 'starter' if player.starter }}">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3" 
+                                                        style="width: 50px; height: 50px; font-weight: bold; font-size: 1.2rem;">
+                                                        {{ player.jerseyNo }}
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="card-title mb-0">{{ player.name }}</h5>
+                                                        <p class="card-text">
+                                                            <span class="badge bg-info">{{ player.position }}</span>
+                                                            {% if player.starter %}
+                                                            <span class="badge bg-success">Starter</span>
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-4">
+    <a href="{{ url_for('refresh', refresh_type='lineups') }}" class="btn btn-primary">
+        <i class="bi bi-arrow-repeat"></i> Refresh Lineup Data
+    </a>
+</div>
+{% endblock %}

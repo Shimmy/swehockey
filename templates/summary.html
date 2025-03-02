@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ game.teams.home.name }} vs {{ game.teams.away.name }} - Summary{% endblock %}
+
+{% block content %}
+<div class="game-header text-center">
+    <h2>
+        <span class="home-team">{{ game.teams.home.name }}</span>
+        <span class="mx-2">{{ game.game.result.score }}</span>
+        <span class="away-team">{{ game.teams.away.name }}</span>
+    </h2>
+    <p class="mb-0">{{ game.game.tournament.name }} | {{ game.game.date|format_datetime }}</p>
+    <p class="mb-0">{{ game.game.venue }}{% if game.game.attendance %} | Attendance: {{ game.game.attendance }}{% endif %}</p>
+    <div class="badge bg-{{ 'success' if game.game.status.isEnded else 'warning' }} mt-2">
+        {{ game.game.status.currentSituation }}
+    </div>
+</div>
+
+<!-- Page Navigation -->
+{% include 'includes/page_navigation.html' %}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card stats-card">
+            <div class="card-header stats-header summary-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Period Results</h5>
+            </div>
+            <div class="card-body">
+                <p class="lead text-center">{{ game.game.result.periodResults }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Team Statistics -->
+    <div class="col-md-6">
+        <div class="card stats-card">
+            <div class="card-header stats-header home-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-house"></i> {{ game.teams.home.name }} Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Goals
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.goals }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Shots
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.shots }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Shot Percentage
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.shotPercentage }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Saves
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.saves }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Save Percentage
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.savePercentage }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Penalty Minutes
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.penalties }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Power Play Time
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.powerPlayTime }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Power Play %
+                        <span class="badge bg-primary rounded-pill">{{ game.statistics.total.home.powerPlayPercentage }}%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card stats-card">
+            <div class="card-header stats-header away-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-airplane"></i> {{ game.teams.away.name }} Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Goals
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.goals }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Shots
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.shots }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Shot Percentage
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.shotPercentage }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Saves
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.saves }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Save Percentage
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.savePercentage }}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Penalty Minutes
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.penalties }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Power Play Time
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.powerPlayTime }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Power Play %
+                        <span class="badge bg-danger rounded-pill">{{ game.statistics.total.away.powerPlayPercentage }}%</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Period-by-Period Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th class="text-center home-team">{{ game.teams.home.shortName }} Goals</th>
+                                <th class="text-center home-team">{{ game.teams.home.shortName }} Shots</th>
+                                <th class="text-center home-team">{{ game.teams.home.shortName }} PIM</th>
+                                <th class="text-center away-team">{{ game.teams.away.shortName }} Goals</th>
+                                <th class="text-center away-team">{{ game.teams.away.shortName }} Shots</th>
+                                <th class="text-center away-team">{{ game.teams.away.shortName }} PIM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for period in game.statistics.byPeriod %}
+                            <tr>
+                                <td>{{ period.period }}</td>
+                                <td class="text-center home-team">{{ period.home.goals }}</td>
+                                <td class="text-center home-team">{{ period.home.shots }}</td>
+                                <td class="text-center home-team">{{ period.home.penalties }}</td>
+                                <td class="text-center away-team">{{ period.away.goals }}</td>
+                                <td class="text-center away-team">{{ period.away.shots }}</td>
+                                <td class="text-center away-team">{{ period.away.penalties }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-dark">
+                                <td><strong>Total</strong></td>
+                                <td class="text-center home-team"><strong>{{ game.statistics.total.home.goals }}</strong></td>
+                                <td class="text-center home-team"><strong>{{ game.statistics.total.home.shots }}</strong></td>
+                                <td class="text-center home-team"><strong>{{ game.statistics.total.home.penalties }}</strong></td>
+                                <td class="text-center away-team"><strong>{{ game.statistics.total.away.goals }}</strong></td>
+                                <td class="text-center away-team"><strong>{{ game.statistics.total.away.shots }}</strong></td>
+                                <td class="text-center away-team"><strong>{{ game.statistics.total.away.penalties }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Officials and Coaches -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-whistle"></i> Officials</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for official in game.personnel.officials %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ official.name }}</span>
+                            <span class="badge bg-secondary">{{ official.type }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Coaches</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="home-team">{{ game.teams.home.name }}</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for coach in game.personnel.coaches.home %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ coach.name }}</span>
+                                    <span class="badge bg-primary">{{ coach.type }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="away-team">{{ game.teams.away.name }}</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for coach in game.personnel.coaches.away %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ coach.name }}</span>
+                                    <span class="badge bg-danger">{{ coach.type }}</span>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-4">
+    <a href="{{ url_for('refresh', refresh_type='summary') }}" class="btn btn-primary">
+        <i class="bi bi-arrow-repeat"></i> Refresh Summary Data
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}SwehockeyAPI Viewer - Enter Game ID{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-search"></i> Find Hockey Game</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="https://cdn.jsdelivr.net/gh/hampusborgos/country-flags@main/svg/se.svg" alt="Swedish Flag" style="width: 80px;">
+                    <h2 class="mt-3">Swedish Hockey Game Viewer</h2>
+                    <p class="lead text-muted">Enter a game ID to view detailed information</p>
+                </div>
+                
+                <form action="{{ url_for('load_game') }}" method="post">
+                    <div class="mb-3">
+                        <label for="game_id" class="form-label">Game ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                            <input type="text" class="form-control form-control-lg" id="game_id" name="game_id" 
+                                placeholder="Enter game ID (e.g. 862422)" required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Load Game
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            Enter a valid game ID from the Swedish hockey league.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer">
+                <div class="accordion" id="exampleGames">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                    data-bs-target="#collapseExamples">
+                                <i class="bi bi-info-circle me-2"></i> Example Game IDs
+                            </button>
+                        </h2>
+                        <div id="collapseExamples" class="accordion-collapse collapse" data-bs-parent="#exampleGames">
+                            <div class="accordion-body">
+                                <div class="list-group">
+                                    <button type="button" class="list-group-item list-group-item-action game-example" 
+                                            data-game-id="862422">
+                                        <strong>862422</strong> - IK Oskarshamn vs HC Dalen (J18 Ettan)
+                                    </button>
+                                    <!-- Add more example games as needed -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Make example games clickable to populate the game ID field
+        document.querySelectorAll('.game-example').forEach(example => {
+            example.addEventListener('click', function() {
+                document.getElementById('game_id').value = this.dataset.gameId;
+            });
+        });
+    });
+</script>
+{% endblock %}
