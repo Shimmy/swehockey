@@ -315,8 +315,35 @@ class HockeyAnnouncer:
             goalie=goalie_name,
             time=game_time
         )
-
-
+    def announce_welcome(self, game_data: Dict[str, Any]) -> str:
+        """Generate announcement for timeout events"""
+        template_name = f"welcome.{self.language}.j2"
+        
+        try:
+            template = self.env.get_template(template_name)
+        except:
+            # Fallback to English if template doesn't exist
+            template = self.env.get_template(f"timeout.en.j2")
+        
+        # Render the template
+        return template.render(
+            game=game_data
+        )
+    
+    def announce_lineups(self, game_data: Dict[str, Any]) -> str:
+        """Generate announcement for timeout events"""
+        template_name = f"lineups.{self.language}.j2"
+        
+        try:
+            template = self.env.get_template(template_name)
+        except:
+            # Fallback to English if template doesn't exist
+            template = self.env.get_template(f"timeout.en.j2")
+        
+        # Render the template
+        return template.render(
+            game=game_data
+        )
 # Example Jinja2 templates with goal context added:
 
 # templates/goal.en.j2
@@ -332,16 +359,18 @@ MÅL! {{ team }} gör mål! {{ scorer }} hittar nätet {{ time }}{% if strength 
 # Other templates remain the same as in the previous version
 
 # Usage example
-#if __name__ == "__main__":
-#    from swehockey import SwehockeyAPI
+if __name__ == "__main__":
+    from swehockey import SwehockeyAPI
 #    
 #    # Initialize API and load a game
-#    api = SwehockeyAPI()
-#    game_data = api.load_game(862422)
+    api = SwehockeyAPI()
+    game_data = api.load_game(862422)
 #    
 #  
 #    # Initialize the announcer
-#    announcer = HockeyAnnouncer(language="sv")
+    announcer = HockeyAnnouncer(language="sv")
+    print(announcer.announce_welcome(game_data))
+    print(announcer.announce_lineups(game_data))
 #    
 #    # Find goal events to announce
 #    goal_events = [event for event in game_data["events"] if event["type"] == "goal"]

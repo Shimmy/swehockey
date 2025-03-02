@@ -1,0 +1,69 @@
+{% set home_players_by_line = {} %}
+{% for player in game.roster.home.players %}
+    {% set _ = home_players_by_line.setdefault(player.line|string, []) %}
+    {% set _ = home_players_by_line[player.line|string].append(player) %}
+{% endfor %}
+{{ game.teams.home.name }} ställer upp med följande lag:
+{% for line_num, players in home_players_by_line.items()|sort %}
+	{% for player in players %}
+{{ player.jerseyNo }} {{ player.name }}
+	{% endfor %}
+{% endfor %}
+
+
+{% set away_players_by_line = {} %}
+{% for player in game.roster.away.players %}
+    {% set _ = away_players_by_line.setdefault(player.line|string, []) %}
+    {% set _ = away_players_by_line[player.line|string].append(player) %}
+{% endfor %}
+{{ game.teams.away.name }} ställer upp med följande lag:
+{% for line_num, players in away_players_by_line.items()|sort %}
+	{% for player in players %}
+{{ player.jerseyNo }} {{ player.name }}
+	{% endfor %}
+{% endfor %}
+
+{% for coach in game.personnel.coaches.home %}
+{{ coach.name }}
+{% endfor %}
+
+"personnel": {
+  "coaches": {
+    "home": [
+      {
+        "id": 172183,
+        "name": "Emil Ivansson",
+        "type": "HC"
+      },
+      {
+        "id": 172184,
+        "name": "William Björklund",
+        "type": "AC"
+      }
+    ],
+    "away": [
+      {
+        "id": 183274,
+        "name": "Filip Wikström",
+        "type": "HC"
+      },
+      {
+        "id": 183273,
+        "name": "Mathias Karlsson",
+        "type": "AC"
+      }
+    ]
+  },
+  "officials": [
+    {
+      "id": 108493,
+      "name": "Alexander Skepp",
+      "type": "Domare"
+    },
+    {
+      "id": 110911,
+      "name": "Erik Karlberg",
+      "type": "Linjemän"
+    }
+  ]
+}
