@@ -53,7 +53,9 @@ def lineups():
     if current_game is None:
         flash('No game loaded', 'warning')
         return redirect(url_for('index'))
-    return render_template('lineups.html', game=current_game)
+    lineups_announce = announcer.announce_lineups(current_game)
+    welcome_announce = announcer.announce_welcome(current_game)
+    return render_template('lineups.html', game=current_game, lineups_announce=lineups_announce, welcome_announce=welcome_announce)
 
 @app.route('/actions')
 def actions():

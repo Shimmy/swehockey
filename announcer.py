@@ -359,18 +359,18 @@ MÅL! {{ team }} gör mål! {{ scorer }} hittar nätet {{ time }}{% if strength 
 # Other templates remain the same as in the previous version
 
 # Usage example
-if __name__ == "__main__":
-    from swehockey import SwehockeyAPI
+#if __name__ == "__main__":
+#    from swehockey import SwehockeyAPI
 #    
 #    # Initialize API and load a game
-    api = SwehockeyAPI()
-    game_data = api.load_game(862422)
+#    api = SwehockeyAPI()
+#    game_data = api.load_game(985581)
 #    
 #  
 #    # Initialize the announcer
-    announcer = HockeyAnnouncer(language="sv")
-    print(announcer.announce_welcome(game_data))
-    print(announcer.announce_lineups(game_data))
+#    announcer = HockeyAnnouncer(language="sv")
+#    print(announcer.announce_welcome(game_data))
+#    print(announcer.announce_lineups(game_data))
 #    
 #    # Find goal events to announce
 #    goal_events = [event for event in game_data["events"] if event["type"] == "goal"]

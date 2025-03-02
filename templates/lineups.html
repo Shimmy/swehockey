@@ -36,6 +36,46 @@
         </ul>
     </div>
 </div>
+{% if welcome_announce %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-megaphone"></i> Announcement</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="mb-0">{{ welcome_announce }}</p>
+                    <button class="btn btn-sm btn-primary speak-btn" data-text="{{ welcome_announce }}" data-event-id="welcome">
+                        <i class="bi bi-volume-up"></i> Speak
+                    </button>
+                </div>
+                <audio id="audio-welcome" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% if lineups_announce %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-megaphone"></i> Announcement</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p class="mb-0">{{ lineups_announce }}</p>
+                    <button class="btn btn-sm btn-primary speak-btn" data-text="{{ lineups_announce }}" data-event-id="lineups">
+                        <i class="bi bi-volume-up"></i> Speak
+                    </button>
+                </div>
+                <audio id="audio-lineups" controls style="display: none; width: 100%; margin-top: 10px;"></audio>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <div class="tab-content" id="lineupsTabContent">
     <!-- Home Team Lineup -->
@@ -232,4 +272,53 @@
         <i class="bi bi-arrow-repeat"></i> Refresh Lineup Data
     </a>
 </div>
+{% endblock %}
+{% block scripts %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+            // Speak button functionality
+        document.querySelectorAll('.speak-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const text = this.dataset.text;
+                const eventId = this.dataset.eventId;
+                const audioElement = document.getElementById(`audio-${eventId}`);
+                
+                // Show loading state
+                this.disabled = true;
+                this.innerHTML = '<i class="bi bi-hourglass-split"></i> Loading...';
+
+                fetch('/tts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `text=${encodeURIComponent(text)}`
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to generate audio');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const audioUrl = URL.createObjectURL(blob);
+                    audioElement.src = audioUrl;
+                    audioElement.style.display = 'block';
+                    audioElement.play();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to generate audio: ' + error.message);
+                })
+                .finally(() => {
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-volume-up"></i> Speak';
+                });
+            });
+        });
+    });
+    </script>
 {% endblock %}
