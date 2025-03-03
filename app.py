@@ -114,6 +114,8 @@ def text_to_speech():
     
     try:
         # Get the audio generator from ElevenLabs
+        text = text.replace("Haninge Anchors HC Röd", "Haninge")
+        text = text.replace("IFK Österåker Hockey", "Österåker")
         audio_generator = tts_client.text_to_speech.convert(
             text=text,
             voice_id="FF7KdobWPaiR0vkcALHF",  # Swedish voice ID

@@ -4,9 +4,12 @@
     {% set _ = away_players_by_line[player.line|string].append(player) %}
 {% endfor %}
 {{ game.teams.away.name }} ställer upp med följande lag:
+{% for goalie in game.roster.away.goalies %}
+{{ goalie.jerseyNo }} {{ goalie.name }}, 
+{% endfor %}
 {% for line_num, players in away_players_by_line.items()|sort %}
 	{% for player in players %}
-{{ player.jerseyNo }} {{ player.name }}
+{{ player.jerseyNo }} {{ player.name }}, 
 	{% endfor %}
 {% endfor %}
 
@@ -17,7 +20,7 @@ Head coach är {{ coach.name }}
 {% if coach.type == "AC" %}
 Assistant coach är {{ coach.name }}
 {% endif %}
-{% endfor %}
+{% endfor %}.
 
 {% set home_players_by_line = {} %}
 {% for player in game.roster.home.players %}
@@ -25,9 +28,12 @@ Assistant coach är {{ coach.name }}
     {% set _ = home_players_by_line[player.line|string].append(player) %}
 {% endfor %}
 {{ game.teams.home.name }} ställer upp med följande lag:
+{% for goalie in game.roster.home.goalies %}
+{{ goalie.jerseyNo }} {{ goalie.name }}, 
+{% endfor %}
 {% for line_num, players in home_players_by_line.items()|sort %}
 	{% for player in players %}
-{{ player.jerseyNo }} {{ player.name }}
+{{ player.jerseyNo }} {{ player.name }}, 
 	{% endfor %}
 {% endfor %}
 
@@ -38,7 +44,7 @@ Head coach är {{ coach.name }}
 {% if coach.type == "AC" %}
 Assistant coach är {{ coach.name }}
 {% endif %}
-{% endfor %}
+{% endfor %}.
 
 {% set linesmen = [] %}
 {% for coach in game.personnel.officials %}
@@ -48,7 +54,8 @@ Matchens domare är {{ coach.name }}
     {% if coach.type == "Linjemän" %}
         {% set _ = linesmen.append(coach.name) %}
     {% endif %}
-{% endfor %}
+{% endfor %}.
+
 {% if linesmen %}
 Linjemän är {{ linesmen | join(' och ') }}
 {% endif %}
